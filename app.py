@@ -9,6 +9,9 @@ sys.path.append('./python/')
 from gen_png import makePNG
 
 my_port = 5050
+if len(sys.argv) > 1:
+    my_port = sys.argv[1]
+
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'public')
 app = Flask(__name__, static_url_path='', template_folder='public')
 
