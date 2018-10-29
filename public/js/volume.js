@@ -1,4 +1,3 @@
-
 THREE.Cache.enabled = true;
 var strDownloadMime = "image/octet-stream";
 var saveFile =
@@ -51,6 +50,7 @@ var Menu = function() {
     };
     this.reset_view = resetView;
     this.auto_rotate = false;
+    this.wireframe = true;
 };
 
 var menu = new Menu();
@@ -194,6 +194,7 @@ var start = function() {
     gui.add(menu, 'screenshot');
     gui.add(menu, 'reset_view');
     gui.add(menu, 'auto_rotate').listen();
+    gui.add(menu, 'wireframe').listen();
 
     ctlFile.onFinishChange(updateFile);
     ctlStarColor.onChange(updateTexture);
@@ -256,6 +257,13 @@ var start = function() {
     var cube2 = new THREE.Mesh(cube_geometry, mat2);
     scene.add(cube2);
 
+    var cube_edge = new THREE.EdgesGeometry( cube_geometry );
+    var wiremat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2,
+						 depthTest: false, depthWrite: false});
+    var wireframe = new THREE.LineSegments( cube_edge, wiremat );
+
+    scene.add( wireframe );
+
     function updateTexture(value) {
 	mat2.uniforms.starColor.value = new THREE.Color(menu.star_color);
 	mat2.uniforms.transferTex.value = updateTransferFunction();
@@ -296,6 +304,7 @@ var start = function() {
 	    mat2.uniforms.cubeTex.value = dataTex;
 	    texNeedsUpdate = false;
 	}
+	wireframe.visible = menu.wireframe;
 	// console.log(menu.star_radius);
 	mat2.uniforms.star_radius.value = menu.star_radius;
 	mat2.uniforms.alphaCorrection.value = menu.alpha_correction;
