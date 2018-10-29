@@ -32,3 +32,11 @@ then navigate to the above url as if it is on your own machine.
 # How to use
 
 Initially when you load the webpage you will see a sphere and some controls on the upper right corner. The texture will load in 20~30 seconds, so don't panic. The controls are pretty self-explanatory. You can change the file it's rendering in the `filename` box.
+
+Keyboard controls:
+
+- `WSAD`: Pan the camera around
+- `Space`: Reset camera
+- `Arrow Keys`: Rotate camera around
+- `Q`: Decrease alpha correction
+- `E`: Increase alpha correction
