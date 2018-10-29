@@ -343,9 +343,9 @@ var start = function() {
 	} else if (key === 'Space') { // Reset view point
 	    resetView();
 	} else if (key === 'ArrowLeft') {
-	    cameraRotateLeftRight(-0.05);
-	} else if (key === 'ArrowRight') {
 	    cameraRotateLeftRight(0.05);
+	} else if (key === 'ArrowRight') {
+	    cameraRotateLeftRight(-0.05);
 	} else if (key === 'ArrowUp') {
 	    cameraRotateUpDown(-0.05);
 	} else if (key === 'ArrowDown') {
