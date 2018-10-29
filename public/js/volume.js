@@ -37,6 +37,7 @@ var Menu = function() {
     this.color3 = "#ff0000";
     this.stepPos3 = 1.0;
     this.species = 0;
+    this.filename = fname;
     this.screenshot = function() {
         // renderer.render( scene, camera );
         // socket.emit('render-frame', {
@@ -133,23 +134,29 @@ console.log("http://localhost:"+my_port+"/api/img/?filename=" + fname)
 
 var manager = new THREE.LoadingManager();
 var loader = new THREE.FileLoader(manager);
-var imgloader = new THREE.TextureLoader(manager);
+var imgloader = new THREE.TextureLoader();
 var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
+var texNeedsUpdate = false;
 loader.setResponseType('text');
 loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.vert.glsl", function(f) {vs1 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.frag.glsl", function(f) {fs1 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl", function(f) {vs2 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
 
-imgloader.load("http://localhost:"+my_port+"/api/img/?filename=" + fname,
-	       function(f) {
-    dataTex = f;
-    dataTex.flipY = false;
-    dataTex.minFilter = THREE.LinearFilter;
-    dataTex.magFilter = THREE.LinearFilter;
-    dataTex.type = THREE.UnsignedByteType;
-    console.info("Loaded Simulation Data");
-	       });
+function loadSimData(filename) {
+    imgloader.load("http://localhost:"+my_port+"/api/img/?filename=" + filename,
+		   function(f) {
+		       dataTex = f;
+		       dataTex.flipY = false;
+		       dataTex.minFilter = THREE.LinearFilter;
+		       dataTex.magFilter = THREE.LinearFilter;
+		       dataTex.type = THREE.UnsignedByteType;
+		       console.info("Loaded Simulation Data");
+		       texNeedsUpdate = true;
+		   });
+}
+
+loadSimData(menu.filename);
 
 transTex = updateTransferFunction();
 manager.onLoad = function() { start(); };
@@ -157,6 +164,7 @@ manager.onLoad = function() { start(); };
 var start = function() {
     // Setup dat.gui
     var gui = new dat.GUI();
+    ctlFile = gui.add(menu, 'filename');
     gui.add(menu, 'alpha_correction', 0, 4.0).listen();
     gui.add(menu, 'star_radius', 0, 0.1).listen();
     ctlStarColor = gui.addColor(menu, 'star_color');
@@ -170,6 +178,7 @@ var start = function() {
 					   Positrons: 2, Difference: 3}).listen();
     gui.add(menu, 'screenshot');
 
+    ctlFile.onFinishChange(updateFile);
     ctlStarColor.onChange(updateTexture);
     ctlColor1.onChange(updateTexture);
     ctlColor2.onChange(updateTexture);
@@ -239,6 +248,10 @@ var start = function() {
 	mat2.uniforms.species.value = menu.species;
     }
 
+    function updateFile(value) {
+	loadSimData(menu.filename);
+    }
+
     function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
@@ -257,6 +270,10 @@ var start = function() {
     }
 
     function render() {
+	if (texNeedsUpdate) {
+	    mat2.uniforms.cubeTex.value = dataTex;
+	    texNeedsUpdate = false;
+	}
 	// console.log(menu.star_radius);
 	mat2.uniforms.star_radius.value = menu.star_radius;
 	mat2.uniforms.alphaCorrection.value = menu.alpha_correction;

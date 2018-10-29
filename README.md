@@ -28,3 +28,7 @@ If you want to do this on your own machine you could do that too. Just bind the 
 	ssh -L 5050:localhost:5050 user@server
 	
 then navigate to the above url as if it is on your own machine.
+
+# How to use
+
+Initially when you load the webpage you will see a sphere and some controls on the upper right corner. The texture will load in 20~30 seconds, so don't panic. The controls are pretty self-explanatory. You can change the file it's rendering in the `filename` box.
