@@ -63,29 +63,29 @@ vec4 sampleAs3DTexture(vec3 texCoord) {
 
   // Based on the opacity obtained earlier, get the RGB color in the transfer
   // function texture.
-  colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
-  colorSlice2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
-  // if (species == 0) {
-  //   color1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
-  //   color2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
-  //   color1.a = colorSlice1.a;
-  //   color2.a = colorSlice2.a;
-  // } else if (species == 1) {
-  //   color1.rgb = texture2D(transferTex, vec2(colorSlice1.b, 1.0)).rgb;
-  //   color2.rgb = texture2D(transferTex, vec2(colorSlice2.b, 1.0)).rgb;
-  //   color1.a = colorSlice1.b;
-  //   color2.a = colorSlice2.b;
-  // } else if (species == 2) {
-  //   color1.rgb = texture2D(transferTex, vec2(colorSlice1.r, 1.0)).rgb;
-  //   color2.rgb = texture2D(transferTex, vec2(colorSlice2.r, 1.0)).rgb;
-  //   color1.a = colorSlice1.r;
-  //   color2.a = colorSlice2.r;
-  // } else if (species == 3) {
-  //   color1.rgb = texture2D(transferTex, vec2(colorSlice1.g, 1.0)).rgb;
-  //   color2.rgb = texture2D(transferTex, vec2(colorSlice2.g, 1.0)).rgb;
-  //   color1.a = colorSlice1.g;
-  //   color2.a = colorSlice2.g;
-  // }
+  // colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
+  // colorSlice2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
+  if (species == 0) {
+    color1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
+    color2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
+    color1.a = colorSlice1.a;
+    color2.a = colorSlice2.a;
+  } else if (species == 1) {
+    color1.rgb = texture2D(transferTex, vec2(colorSlice1.r, 1.0)).rgb;
+    color2.rgb = texture2D(transferTex, vec2(colorSlice2.r, 1.0)).rgb;
+    color1.a = colorSlice1.r;
+    color2.a = colorSlice2.r;
+  } else if (species == 2) {
+    color1.rgb = texture2D(transferTex, vec2(colorSlice1.b, 1.0)).rgb;
+    color2.rgb = texture2D(transferTex, vec2(colorSlice2.b, 1.0)).rgb;
+    color1.a = colorSlice1.b;
+    color2.a = colorSlice2.b;
+  } else if (species == 3) {
+    color1.rgb = texture2D(transferTex, vec2(colorSlice1.g, 1.0)).rgb;
+    color2.rgb = texture2D(transferTex, vec2(colorSlice2.g, 1.0)).rgb;
+    color1.a = colorSlice1.g;
+    color2.a = colorSlice2.g;
+  }
   // colorSlice1.a = 255 - colorSlice1.a;
   // colorSlice2.a = 255 - colorSlice2.a;
 
@@ -94,8 +94,8 @@ vec4 sampleAs3DTexture(vec3 texCoord) {
   float zDifference = mod(texCoord.z * (res - 1.0), 1.0);
 
   // Finally interpolate between the two intermediate colors of each Z slice.
-  // return mix(color1, color2, zDifference);
-  return mix(colorSlice1, colorSlice2, zDifference);
+  return mix(color1, color2, zDifference);
+  // return mix(colorSlice1, colorSlice2, zDifference);
 }
 
 void main(void) {

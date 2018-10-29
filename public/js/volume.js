@@ -46,9 +46,11 @@ var Menu = function() {
         //     file: document.querySelector('canvas').toDataURL()
         // });
         var strMime = "image/png";
-        var data = document.querySelector('canvas').toDataURL(strMime);
+        var data = document.querySelector('#RenderCanvas').toDataURL(strMime);
         saveFile(data.replace(strMime, strDownloadMime), "screenshot.png");
     };
+    this.reset_view = resetView;
+    this.auto_rotate = false;
 };
 
 var menu = new Menu();
@@ -114,22 +116,35 @@ renderer.autoClear = true;
 // Append Renderer to DOM
 var canvas = renderer.domElement;
 document.body.appendChild(canvas);
+canvas.id = "RenderCanvas"
 // var context = canvas.getContext( 'webgl2' );
 
 // document.addEventListener('mousedown', function() {
 //     paused = !paused;
 // }, false);
 var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-
 camera.position.y = -1;
 camera.position.z = 1;
-// camera.position.x = 7;
+camera.position.x = 0;
 camera.lookAt([ 0, 0, 0 ]);
 camera.up = new THREE.Vector3(0, 0, 1);
-camera.updateProjectionMatrix();
+
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-controls.update();
+controls.keys = {
+    LEFT: 65, // key a
+    UP: 87, // key w
+    RIGHT: 68, // key d
+    BOTTOM: 83 // key s
+}
+
+function resetView() {
+    controls.reset();
+}
+
+// resetView();
+camera.updateProjectionMatrix();
+
 console.log("http://localhost:"+my_port+"/api/img/?filename=" + fname)
 
 var manager = new THREE.LoadingManager();
@@ -174,9 +189,11 @@ var start = function() {
     ctlStep2 = gui.add(menu, 'stepPos2', 0, 1);
     ctlColor3 = gui.addColor(menu, 'color3');
     ctlStep3 = gui.add(menu, 'stepPos3', 0, 1);
-    ctlSpecies = gui.add(menu, 'species', {Both: 0, Electrons: 1,
-					   Positrons: 2, Difference: 3}).listen();
+    ctlSpecies = gui.add(menu, 'species', {"dens": 0, "densi": 1,
+					   "dens+densi": 2, "dens-densi": 3}).listen();
     gui.add(menu, 'screenshot');
+    gui.add(menu, 'reset_view');
+    gui.add(menu, 'auto_rotate').listen();
 
     ctlFile.onFinishChange(updateFile);
     ctlStarColor.onChange(updateTexture);
@@ -259,6 +276,11 @@ var start = function() {
     }
 
     function animate() {
+	if (menu.auto_rotate) {
+	    controls.autoRotate = true;
+	} else {
+	    controls.autoRotate = false;
+	}
 	requestAnimationFrame(animate);
 	stats.begin();
 	// required if controls.enableDamping or controls.autoRotate are set to true
@@ -287,8 +309,12 @@ var start = function() {
 	// console.log(key);
 	if (key === 'KeyQ') { // Q key
 	    menu.alpha_correction -= 0.02;
-	} else if (key === 'KeyW') { // W key
+	} else if (key === 'KeyE') { // W key
 	    menu.alpha_correction += 0.02;
+	} else if (key === 'Space') { // Reset view point
+	    resetView();
+	} else if (key === 'ArrowLeft') {
+	    
 	}
     };
 
