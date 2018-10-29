@@ -303,6 +303,26 @@ var start = function() {
 	renderer.render(scene, camera);
     }
 
+    function cameraRotateLeftRight(degree) {
+	var cam_radius = Math.sqrt(camera.position.x * camera.position.x +
+				   camera.position.y * camera.position.y);
+
+        camera.position.y += degree * camera.position.x / cam_radius;
+        camera.position.x -= degree * camera.position.y / cam_radius;
+	camera.updateProjectionMatrix();
+	controls.update();
+    }
+
+    function cameraRotateUpDown(degree) {
+	var cam_radius = Math.sqrt(camera.position.y * camera.position.y +
+				   camera.position.z * camera.position.z);
+
+        camera.position.z += degree * camera.position.y / cam_radius;
+        camera.position.y -= degree * camera.position.z / cam_radius;
+	camera.updateProjectionMatrix();
+	controls.update();
+    }
+
     document.body.onkeydown = function(event) {
 	// var key = event.which || event.keyCode || 0;
 	var key = event.code || 0;
@@ -314,7 +334,13 @@ var start = function() {
 	} else if (key === 'Space') { // Reset view point
 	    resetView();
 	} else if (key === 'ArrowLeft') {
-	    
+	    cameraRotateLeftRight(-0.05);
+	} else if (key === 'ArrowRight') {
+	    cameraRotateLeftRight(0.05);
+	} else if (key === 'ArrowUp') {
+	    cameraRotateUpDown(-0.05);
+	} else if (key === 'ArrowDown') {
+	    cameraRotateUpDown(0.05);
 	}
     };
 
