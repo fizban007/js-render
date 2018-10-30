@@ -336,7 +336,7 @@ var start = function() {
 	ctlColor3 = gui.addColor(menu, 'color3');
 	ctlStep3 = gui.add(menu, 'stepPos3', 0, 1);
 	ctlSpecies = gui.add(menu, 'species', {"dens": 0, "densi": 1,
-					       "dens+densi": 2, "dens-densi": 3}).listen();
+					       "bdensi": 2, "dens-densi": 3}).listen();
 	gui.add(menu, 'screenshot');
 	gui.add(menu, 'reset_view');
 	gui.add(menu, 'auto_rotate').listen();
@@ -428,14 +428,14 @@ var start = function() {
 	    cameraRotateLeftRight(-0.05);
 	} else if (key === 'ArrowUp') {
 	    if (event.shiftKey) {
-		camera.fov += 0.5;
+		camera.fov -= 0.5;
 		camera.updateProjectionMatrix();
 	    } else {
 		cameraRotateUpDown(0.05);
 	    }
 	} else if (key === 'ArrowDown') {
 	    if (event.shiftKey) {
-		camera.fov -= 0.5;
+		camera.fov += 0.5;
 		camera.updateProjectionMatrix();
 	    } else {
 		cameraRotateUpDown(-0.05);
