@@ -1,5 +1,9 @@
+// Enable caching, file loader seem to only work this way
 THREE.Cache.enabled = true;
+
 var strDownloadMime = "image/octet-stream";
+
+// Function for saving screenshot
 var saveFile =
     function(strData, filename) {
 	var link = document.createElement('a');
@@ -15,13 +19,7 @@ var saveFile =
 	}
     }
 
-function getJson(yourUrl){
-    var Httpreq = new XMLHttpRequest(); // a new request
-    Httpreq.open("GET",yourUrl,false);
-    Httpreq.send(null);
-    return Httpreq.responseText;          
-}
-
+// Constructing the menu
 var Menu = function() {
     this.electrons = true;
     this.positrons = true;
@@ -76,9 +74,10 @@ function updateTransferFunction() {
 
 // Create an empty scene
 var scene = new THREE.Scene();
-// scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x000000);
+// Create an empty scene for first pass rendering
 var scenefbo = new THREE.Scene();
-// scenefbo.background = new THREE.Color(0x000000);
+scenefbo.background = new THREE.Color(0x000000);
 
 // Create a basic perspective camera
 const width = window.innerWidth;
@@ -86,13 +85,14 @@ const height = window.innerHeight;
 const aspect = width / height;
 var paused = false;
 
-// Create a renderer with Antialiasing
+// Create a renderer with Antialiasing. Note alpha needs to be false or
+// there will be weird artifacts
 var renderer = new THREE.WebGLRenderer(
     {alpha : false,
      antialias : true,
      preserveDrawingBuffer : true});
 renderer.setPixelRatio( window.devicePixelRatio );
-renderer.setClearColor("#000000");
+// renderer.setClearColor("#000000");
 
 // Configure renderer size
 renderer.setSize(width, height);
@@ -102,11 +102,8 @@ renderer.autoClear = true;
 var canvas = renderer.domElement;
 document.body.appendChild(canvas);
 canvas.id = "RenderCanvas"
-// var context = canvas.getContext( 'webgl2' );
 
-// document.addEventListener('mousedown', function() {
-//     paused = !paused;
-// }, false);
+// Setup the camera initial condition
 var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 camera.position.y = -1;
 camera.position.z = 0;
@@ -114,8 +111,8 @@ camera.position.x = 0;
 camera.lookAt([ 0, 0, 0 ]);
 camera.up = new THREE.Vector3(0, 0, 1);
 
+// Setup orbit controls for the camera
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
-
 controls.keys = {
     LEFT: 65, // key a
     UP: 87, // key w
@@ -123,14 +120,42 @@ controls.keys = {
     BOTTOM: 83 // key s
 }
 
+// Camera control functions
 function resetView() {
     controls.reset();
 }
 
-// resetView();
+function cameraRotateLeftRight(degree) {
+    var cam_radius = Math.sqrt(camera.position.x * camera.position.x +
+			       camera.position.y * camera.position.y);
+
+    camera.position.y += degree * camera.position.x / cam_radius;
+    camera.position.x -= degree * camera.position.y / cam_radius;
+    camera.updateProjectionMatrix();
+    controls.update();
+}
+
+function cameraRotateUpDown(degree) {
+    var cam_radius = Math.sqrt(camera.position.y * camera.position.y +
+			       camera.position.z * camera.position.z);
+
+    camera.position.z += degree * camera.position.y / cam_radius;
+    camera.position.y -= degree * camera.position.z / cam_radius;
+    camera.updateProjectionMatrix();
+    controls.update();
+}
+
 camera.updateProjectionMatrix();
 
-console.log("http://localhost:"+my_port+"/api/img/?filename=" + fpath + fname)
+var manager = new THREE.LoadingManager();
+var loader = new THREE.FileLoader(manager);
+var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
+var texNeedsUpdate = false;
+loader.setResponseType('text');
+loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.vert.glsl", function(f) {vs1 = f;});
+loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.frag.glsl", function(f) {fs1 = f;});
+loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl", function(f) {vs2 = f;});
+loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
 
 function initSlowLoadingManager() {
     
@@ -150,8 +175,7 @@ function initSlowLoadingManager() {
 	// I'm changing the color only once, you 
 	// could get fancy here and set up the colour to get "redder" every time
 	if ( percentComplete >= 100 ) {
-	    
-	    progressBar.style.backgroundColor = 'blue'
+	    // progressBar.style.backgroundColor = 'blue'
 	    percentComplete = 1;
 
 	}
@@ -192,16 +216,6 @@ function initSlowLoadingManager() {
     
     return manager;
 }
-
-var manager = new THREE.LoadingManager();
-var loader = new THREE.FileLoader(manager);
-var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
-var texNeedsUpdate = false;
-loader.setResponseType('text');
-loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.vert.glsl", function(f) {vs1 = f;});
-loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.frag.glsl", function(f) {fs1 = f;});
-loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl", function(f) {vs2 = f;});
-loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
 
 function loadSimData(filename) {
     var slow_manager = initSlowLoadingManager();
@@ -377,26 +391,6 @@ var start = function() {
 	mat2.uniforms.alphaCorrection.value = menu.alpha_correction;
 	renderer.render(scenefbo, camera, rtTexture, true);
 	renderer.render(scene, camera);
-    }
-
-    function cameraRotateLeftRight(degree) {
-	var cam_radius = Math.sqrt(camera.position.x * camera.position.x +
-				   camera.position.y * camera.position.y);
-
-        camera.position.y += degree * camera.position.x / cam_radius;
-        camera.position.x -= degree * camera.position.y / cam_radius;
-	camera.updateProjectionMatrix();
-	controls.update();
-    }
-
-    function cameraRotateUpDown(degree) {
-	var cam_radius = Math.sqrt(camera.position.y * camera.position.y +
-				   camera.position.z * camera.position.z);
-
-        camera.position.z += degree * camera.position.y / cam_radius;
-        camera.position.y -= degree * camera.position.z / cam_radius;
-	camera.updateProjectionMatrix();
-	controls.update();
     }
 
     // canvas.tabIndex = 1000;
