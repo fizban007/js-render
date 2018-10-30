@@ -428,18 +428,24 @@ var start = function() {
 	    cameraRotateLeftRight(-0.05);
 	} else if (key === 'ArrowUp') {
 	    if (event.shiftKey) {
-		camera.fov -= 0.5;
+		camera.zoom += 0.05;
 		camera.updateProjectionMatrix();
 	    } else {
 		cameraRotateUpDown(0.05);
 	    }
 	} else if (key === 'ArrowDown') {
 	    if (event.shiftKey) {
-		camera.fov += 0.5;
+		camera.zoom -= 0.05;
 		camera.updateProjectionMatrix();
 	    } else {
 		cameraRotateUpDown(-0.05);
 	    }
+	} else if (key === 'KeyZ') {
+	    camera.fov -= 0.5;
+	    camera.updateProjectionMatrix();
+	} else if (key === 'KeyX') {
+	    camera.fov += 0.5;
+	    camera.updateProjectionMatrix();
 	}
     };
 
