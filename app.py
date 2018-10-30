@@ -3,10 +3,12 @@ from functools import lru_cache
 import sys
 import os
 import base64
+import datetime
 
 sys.path.append('./python/')
 
 from gen_png import makePNG
+from cache import FileCache
 
 my_port = 5050
 if len(sys.argv) > 1:
@@ -15,6 +17,9 @@ if len(sys.argv) > 1:
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'public')
 app = Flask(__name__, static_url_path='', template_folder='public')
 
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+cache = FileCache(16)
 
 @app.route('/public/<path:path>', methods=['GET'])
 def serve_file_in_dir(path):
@@ -26,8 +31,12 @@ def serve_file_in_dir(path):
 @app.route('/api/img/')
 def gen_image():
     arg = request.args.get('filename')
-    png_bytes = makePNG(arg)
-    png_bytes.seek(0)
+    if arg in cache:
+        png_bytes = cache.get(arg)
+    else:
+        png_bytes = makePNG(arg)
+        png_bytes.seek(0)
+        cache.update(arg, png_bytes)
     return send_file(png_bytes, mimetype='image/png',
                      attachment_filename='data.png')
 

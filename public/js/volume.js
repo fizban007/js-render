@@ -21,7 +21,7 @@ function getJson(yourUrl){
     Httpreq.send(null);
     return Httpreq.responseText;          
 }
-console.log(fname)
+
 var Menu = function() {
     this.electrons = true;
     this.positrons = true;
@@ -52,9 +52,9 @@ var Menu = function() {
     this.auto_rotate = false;
     this.wireframe = true;
 };
-
 var menu = new Menu();
 
+// Add a fps panel
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
@@ -70,13 +70,6 @@ function updateTransferFunction() {
     grd.addColorStop(menu.stepPos3, menu.color3);
     ctx.fillStyle = grd;
     ctx.fillRect(0,0,canvas.width ,canvas.height );
-    // var img = document.getElementById("transferFunctionImg");
-    // img.src = canvas.toDataURL();
-    // img.style.width = "256 px";
-    // img.style.height = "128 px";
-    // var strMime = "image/png";
-    // var data = canvas.toDataURL(strMime);
-    // saveFile(data.replace(strMime, strDownloadMime), "colors.png");
 
     var transferTexture =  new THREE.CanvasTexture(canvas);
     transferTexture.wrapS = transferTexture.wrapT =  THREE.ClampToEdgeWrapping;
@@ -85,9 +78,6 @@ function updateTransferFunction() {
     transferTexture.needsUpdate = true;
     return transferTexture;
 }
-// var transferTex = new THREE.CanvasTexture({
-//     canvas: transferFunction()
-// });
 
 // Create an empty scene
 var scene = new THREE.Scene();
