@@ -115,7 +115,7 @@ canvas.id = "RenderCanvas"
 // }, false);
 var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 camera.position.y = -1;
-camera.position.z = 1;
+camera.position.z = 0;
 camera.position.x = 0;
 camera.lookAt([ 0, 0, 0 ]);
 camera.up = new THREE.Vector3(0, 0, 1);
