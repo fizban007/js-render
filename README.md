@@ -38,5 +38,6 @@ Keyboard controls:
 - `WSAD`: Pan the camera around
 - `Space`: Reset camera
 - `Arrow Keys`: Rotate camera around
+- `Shift + Up/Down`: Adjust camera FOV
 - `Q`: Decrease alpha correction
 - `E`: Increase alpha correction

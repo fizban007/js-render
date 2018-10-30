@@ -44,6 +44,8 @@ var Menu = function() {
     this.reset_view = resetView;
     this.auto_rotate = false;
     this.wireframe = true;
+    this.isPaused = false;
+    this.fov = 20;
 };
 var menu = new Menu();
 
@@ -104,8 +106,8 @@ document.body.appendChild(canvas);
 canvas.id = "RenderCanvas"
 
 // Setup the camera initial condition
-var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-camera.position.y = -1;
+var camera = new THREE.PerspectiveCamera(menu.fov, aspect, 0.1, 1000);
+camera.position.y = -4.0;
 camera.position.z = 0;
 camera.position.x = 0;
 camera.lookAt([ 0, 0, 0 ]);
@@ -119,6 +121,7 @@ controls.keys = {
     RIGHT: 68, // key d
     BOTTOM: 83 // key s
 }
+controls.screenSpacePanning = true;
 
 // Camera control functions
 function resetView() {
@@ -147,6 +150,7 @@ function cameraRotateUpDown(degree) {
 
 camera.updateProjectionMatrix();
 
+// Loading shaders and other things
 var manager = new THREE.LoadingManager();
 var loader = new THREE.FileLoader(manager);
 var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
@@ -157,6 +161,7 @@ loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.frag.glsl", 
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl", function(f) {vs2 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
 
+// Functions to load the simulation data (in png texture)
 function initSlowLoadingManager() {
     
     const manager = new THREE.LoadingManager();
@@ -251,8 +256,11 @@ loadSimData(menu.filepath + menu.filename);
 transTex = updateTransferFunction();
 manager.onLoad = function() { start(); };
 
+// Properly start the rendering
 var start = function() {
     gui = makeGUI();
+
+    // framebuffer for first pass
     var rtTexture = new THREE.WebGLRenderTarget(
 	window.innerWidth, window.innerHeight, {
 	    minFilter: THREE.LinearFilter,
@@ -267,7 +275,7 @@ var start = function() {
 	    // stencilBuffer: false
 	} );
 
-    // First pass
+    // First pass shader
     var mat1 = new THREE.ShaderMaterial({
 	// uniforms: {},
 	vertexShader: vs1,
@@ -276,6 +284,7 @@ var start = function() {
 	// vertexColors: true
     });
 
+    // Second pass shader
     var mat2 = new THREE.ShaderMaterial({
 	uniforms: {
 	    tex: {type: "t", value: rtTexture.texture},
@@ -304,6 +313,7 @@ var start = function() {
     var cube2 = new THREE.Mesh(cube_geometry, mat2);
     scene.add(cube2);
 
+    // Add a wireframe of the cube
     var cube_edge = new THREE.EdgesGeometry( cube_geometry );
     var wiremat = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2,
 						 depthTest: false, depthWrite: false});
@@ -331,6 +341,8 @@ var start = function() {
 	gui.add(menu, 'reset_view');
 	gui.add(menu, 'auto_rotate').listen();
 	gui.add(menu, 'wireframe').listen();
+	gui.add(menu, 'isPaused').listen();
+	// gui.add(menu, 'fov', 1.0, 200.0).listen();
 
 	ctlPath.onFinishChange(updateFile);
 	ctlFile.onFinishChange(updateFile);
@@ -373,10 +385,14 @@ var start = function() {
 	requestAnimationFrame(animate);
 	stats.begin();
 	// required if controls.enableDamping or controls.autoRotate are set to true
-	controls.update();
-	camera.updateProjectionMatrix();
-	// console.log(camera.position);
-	render();
+	// controls.target = new THREE.Vector3(0, 0, 0);
+	if (!menu.isPaused) {
+	    controls.update();
+	    // camera.fov = menu.fov;
+	    camera.updateProjectionMatrix();
+	    // console.log(camera.position);
+	    render();
+	}
 	stats.end();
     }
 
@@ -411,9 +427,19 @@ var start = function() {
 	} else if (key === 'ArrowRight') {
 	    cameraRotateLeftRight(-0.05);
 	} else if (key === 'ArrowUp') {
-	    cameraRotateUpDown(-0.05);
+	    if (event.shiftKey) {
+		camera.fov += 0.5;
+		camera.updateProjectionMatrix();
+	    } else {
+		cameraRotateUpDown(0.05);
+	    }
 	} else if (key === 'ArrowDown') {
-	    cameraRotateUpDown(0.05);
+	    if (event.shiftKey) {
+		camera.fov -= 0.5;
+		camera.updateProjectionMatrix();
+	    } else {
+		cameraRotateUpDown(-0.05);
+	    }
 	}
     };
 

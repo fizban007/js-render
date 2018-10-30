@@ -19,6 +19,7 @@ def makePNG(fname):
     with h5py.File(fname, 'r') as f:
         data_dens = f['dens'][:,:,:]
         data_densi = f['densi'][:,:,:]
+        data_bdensi = f['bdensi'][:,:,:]
         f.close()
     print('Finished reading hdf data')
     dims = data_dens.shape
@@ -32,9 +33,10 @@ def makePNG(fname):
     # start = time.time()
     data1 = data_dens[offset:dims[0]-offset, offset:dims[1]-offset, offset:dims[2]-offset]
     data2 = data_densi[offset:dims[0]-offset, offset:dims[1]-offset, offset:dims[2]-offset]
+    data3 = data_bdensi[offset:dims[0]-offset, offset:dims[1]-offset, offset:dims[2]-offset]
     # assign pixel values
     alpha = (np.minimum(data1*256./max_val, 255).astype('uint32') << 24)
-    blue = (np.minimum((data1 + data2)*256./max_val, 255).astype('uint32') << 16)
+    blue = (np.minimum(data3*256./max_val, 255).astype('uint32') << 16)
     green = (np.minimum(np.abs(data1 - data2)*256./max_val, 255).astype('uint32') << 8)
     red = (np.minimum(data2*256./max_val, 255).astype('uint32'))
 
