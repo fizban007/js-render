@@ -3,7 +3,7 @@ THREE.Cache.enabled = true;
 
 var strDownloadMime = "image/octet-stream";
 
-// Function for saving screenshot
+// Function for saving a file (screenshot)
 var saveFile =
     function(strData, filename) {
 	var link = document.createElement('a');
@@ -21,9 +21,6 @@ var saveFile =
 
 // Constructing the menu
 var Menu = function() {
-    this.electrons = true;
-    this.positrons = true;
-    // this.fieldLines = true;
     this.alpha_correction = 1.0;
     this.star_radius = 0.055;
     this.star_color = "#666666";
@@ -259,6 +256,7 @@ manager.onLoad = function() { start(); };
 // Properly start the rendering
 var start = function() {
     gui = makeGUI();
+    // gui.remember(menu);
 
     // framebuffer for first pass
     var rtTexture = new THREE.WebGLRenderTarget(
@@ -324,36 +322,40 @@ var start = function() {
     function makeGUI() {
 	// Setup dat.gui
 	var gui = new dat.GUI();
-	ctlPath = gui.add(menu, 'filepath');
-	ctlFile = gui.add(menu, 'filename');
+	gui.add(menu, 'filepath').onFinishChange(updateFile);
+	gui.add(menu, 'filename').onFinishChange(updateFile);
 	gui.add(menu, 'alpha_correction', 0, 4.0).listen();
 	gui.add(menu, 'star_radius', 0, 0.1).listen();
-	ctlStarColor = gui.addColor(menu, 'star_color');
-	ctlColor1 = gui.addColor(menu, 'color1');
-	ctlStep1 = gui.add(menu, 'stepPos1', 0, 1);
-	ctlColor2 = gui.addColor(menu, 'color2');
-	ctlStep2 = gui.add(menu, 'stepPos2', 0, 1);
-	ctlColor3 = gui.addColor(menu, 'color3');
-	ctlStep3 = gui.add(menu, 'stepPos3', 0, 1);
-	ctlSpecies = gui.add(menu, 'species', {"dens": 0, "densi": 1,
-					       "bdensi": 2, "dens-densi": 3}).listen();
+	gui.addColor(menu, 'star_color').listen().onChange(updateTexture);
+	gui.addColor(menu, 'color1').listen().onChange(updateTexture);
+	gui.add(menu, 'stepPos1', 0, 1).listen().onChange(updateTexture);
+	gui.addColor(menu, 'color2').listen().onChange(updateTexture);
+	gui.add(menu, 'stepPos2', 0, 1).listen().onChange(updateTexture);
+	gui.addColor(menu, 'color3').listen().onChange(updateTexture);
+	gui.add(menu, 'stepPos3', 0, 1).listen().onChange(updateTexture);
+	gui.add(menu, 'species', {"dens": 0, "densi": 1,
+				  "bdensi": 2, "dens-densi": 3}).listen().onChange(updateSpecies);
 	gui.add(menu, 'screenshot');
 	gui.add(menu, 'reset_view');
 	gui.add(menu, 'auto_rotate').listen();
 	gui.add(menu, 'wireframe').listen();
 	gui.add(menu, 'isPaused').listen();
+	menu.load = loadConfigFile;
+	menu.save = saveConfigFile;
+	gui.add(menu, 'load');
+	gui.add(menu, 'save');
 	// gui.add(menu, 'fov', 1.0, 200.0).listen();
 
-	ctlPath.onFinishChange(updateFile);
-	ctlFile.onFinishChange(updateFile);
-	ctlStarColor.onChange(updateTexture);
-	ctlColor1.onChange(updateTexture);
-	ctlColor2.onChange(updateTexture);
-	ctlColor3.onChange(updateTexture);
-	ctlStep1.onChange(updateTexture);
-	ctlStep2.onChange(updateTexture);
-	ctlStep3.onChange(updateTexture);
-	ctlSpecies.onChange(updateSpecies);
+	// ctlPath.onFinishChange(updateFile);
+	// ctlFile.onFinishChange(updateFile);
+	// ctlStarColor.onChange(updateTexture);
+	// ctlColor1.onChange(updateTexture);
+	// ctlColor2.onChange(updateTexture);
+	// ctlColor3.onChange(updateTexture);
+	// ctlStep1.onChange(updateTexture);
+	// ctlStep2.onChange(updateTexture);
+	// ctlStep3.onChange(updateTexture);
+	// ctlSpecies.onChange(updateSpecies);
 	return gui;
     }
 
@@ -446,9 +448,86 @@ var start = function() {
 	} else if (key === 'KeyX') {
 	    camera.fov += 0.5;
 	    camera.updateProjectionMatrix();
+	} else if (key === 'KeyS' && event.ctrlKey) {
+	    event.preventDefault();
+	    saveConfigFile();
+	} else if (key === 'KeyL' && event.ctrlKey) {
+	    event.preventDefault();
+	    loadConfigFile();
 	}
     };
 
     animate();
+
+    // Function for loading a config file
+    function loadConfigFile() {
+	var f = document.createElement('input');
+	document.body.appendChild(
+	    f); // Firefox requires the link to be in the body
+	f.setAttribute("type", "file");
+	f.setAttribute("id", "file-input");
+	f.addEventListener('change', parseConfigFile, false);
+	f.click();
+	document.body.removeChild(f); // remove the link when done
+    }
+
+    function parseConfigFile(e) {
+	var file = e.target.files[0];
+	if (!file) {
+	    return "";
+	}
+	var reader = new FileReader();
+	reader.onload = function(e) {
+	    var contents = e.target.result;
+	    try {
+		var config = JSON.parse(contents);
+
+		menu.alpha_correction = config.alpha_correction;
+		menu.star_radius = config.star_radius;
+		menu.star_color = config.star_color;
+		menu.color1 = config.color1;
+		menu.stepPos1 = config.stepPos1;
+		menu.color2 = config.color2;
+		menu.stepPos2 = config.stepPos2;
+		menu.color3 = config.color3;
+		menu.stepPos3 = config.stepPos3;
+		menu.species = config.species;
+		menu.filepath = config.filepath;
+		menu.filename = config.filename;
+		menu.wireframe = config.wireframe;
+		menu.auto_rotate = config.auto_rotate;
+		menu.fov = config.fov;
+		camera.position.x = config.cam_pos.x;
+		camera.position.y = config.cam_pos.y;
+		camera.position.z = config.cam_pos.z;
+		camera.zoom = config.cam_zoom;
+		camera.fov = config.fov;
+
+		// Iterate over all controllers
+		for (var i in gui.__controllers) {
+		    gui.__controllers[i].updateDisplay();
+		}
+		camera.updateProjectionMatrix();
+		updateFile();
+		updateTexture();
+		updateSpecies();
+	    } catch (e) {
+		return false;
+	    }
+	    // displayContents(contents);
+	    // console.log(contents);
+	};
+	reader.readAsText(file);
+    }
+
+    function saveConfigFile() {
+	var conf = menu;
+	conf.cam_pos = camera.position;
+	conf.cam_zoom = camera.zoom;
+	var conf_str = JSON.stringify(conf);
+	console.log(conf_str);
+	// saveFile(conf_str, "config.json");
+	saveFile("data:application/octet-stream," + encodeURIComponent(conf_str), "config.json");
+    }
 
 }
