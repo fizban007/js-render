@@ -19,9 +19,9 @@ Note that `5050` is the default port if you don't supply the port number. You ca
 
 Now to access the web page, you could launch a browser on `tigressdata` and point to the following url:
 
-	http://localhost:5050/render/?filename=FILE
+	http://localhost:5050/render/?path=PATH&filename=FILE
 	
-Remember to change `5050` to whatever port you used above for the server, and put the full path of the hdf5 file you want to visualize in place of `FILE`. You can also change this file later in the mini gui.
+Remember to change `5050` to whatever port you used above for the server. `PATH` and `FILE` are separately the path to the hdf5 file you want to visualize, and the name of the file. You can also change this file later in the mini gui.
 
 If you want to do this on your own machine you could do that too. Just bind the port to your own machine using:
 
