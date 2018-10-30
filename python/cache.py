@@ -1,3 +1,5 @@
+import datetime
+
 class FileCache:
     def __init__(self, max_size):
         self.cache = {}
