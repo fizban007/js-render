@@ -399,13 +399,16 @@ var start = function() {
 	controls.update();
     }
 
-    canvas.onkeydown = function(event) {
+    // canvas.tabIndex = 1000;
+    document.body.onkeydown = function(event) {
+	if (document.activeElement.tagName.toLowerCase() == 'input')
+	    return;
 	// var key = event.which || event.keyCode || 0;
 	var key = event.code || 0;
 	// console.log(key);
-	if (key === 'KeyQ') { // Q key
+	if (key === 'KeyQ') {
 	    menu.alpha_correction -= 0.02;
-	} else if (key === 'KeyE') { // W key
+	} else if (key === 'KeyE') {
 	    menu.alpha_correction += 0.02;
 	} else if (key === 'Space') { // Reset view point
 	    resetView();
