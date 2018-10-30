@@ -39,12 +39,6 @@ var Menu = function() {
     this.filepath = fpath;
     this.filename = fname;
     this.screenshot = function() {
-        // renderer.render( scene, camera );
-        // socket.emit('render-frame', {
-        //     // frame: frame++,
-        //     frame: 0,
-        //     file: document.querySelector('canvas').toDataURL()
-        // });
         var strMime = "image/png";
         var data = document.querySelector('#RenderCanvas').toDataURL(strMime);
         saveFile(data.replace(strMime, strDownloadMime), "screenshot.png");
@@ -199,9 +193,7 @@ function initSlowLoadingManager() {
 }
 
 var manager = new THREE.LoadingManager();
-var slow_manager = initSlowLoadingManager();
 var loader = new THREE.FileLoader(manager);
-var imgloader = new THREE.TextureLoader(slow_manager);
 var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
 var texNeedsUpdate = false;
 loader.setResponseType('text');
@@ -211,16 +203,32 @@ loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl",
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
 
 function loadSimData(filename) {
-    imgloader.load("http://localhost:"+my_port+"/api/img/?filename=" + filename,
-		   function(f) {
-		       dataTex = f;
-		       dataTex.flipY = false;
-		       dataTex.minFilter = THREE.LinearFilter;
-		       dataTex.magFilter = THREE.LinearFilter;
-		       dataTex.type = THREE.UnsignedByteType;
-		       console.info("Loaded Simulation Data");
-		       texNeedsUpdate = true;
-		   }, slow_manager.onProgress, slow_manager.onError);
+    var slow_manager = initSlowLoadingManager();
+    // var imgloader = new THREE.TextureLoader(slow_manager);
+    var json_loader = new THREE.FileLoader(slow_manager);
+    // imgloader.load("http://localhost:"+my_port+"/img/?filename=" + filename,
+    // 		   function(f) {
+    // 		       dataTex = f;
+    // 		       dataTex.flipY = false;
+    // 		       dataTex.minFilter = THREE.LinearFilter;
+    // 		       dataTex.magFilter = THREE.LinearFilter;
+    // 		       dataTex.type = THREE.UnsignedByteType;
+    // 		       console.info("Loaded Simulation Data");
+    // 		       texNeedsUpdate = true;
+    // 		   }, slow_manager.onProgress, slow_manager.onError);
+    json_loader.load("http://localhost:"+my_port+"/img/?filename=" + filename,
+    		     function(content) {
+			 var texloader = new THREE.TextureLoader(slow_manager);
+			 texloader.load(JSON.parse(content).imgString, function(f) {
+    			     dataTex = f;
+    			     dataTex.flipY = false;
+    			     dataTex.minFilter = THREE.LinearFilter;
+    			     dataTex.magFilter = THREE.LinearFilter;
+    			     dataTex.type = THREE.UnsignedByteType;
+    			     console.info("Loaded Simulation Data");
+    			     texNeedsUpdate = true;
+			 }, slow_manager.onProgress, slow_manager.onError);
+    		     }, slow_manager.onProgress, slow_manager.onError);
 }
 
 loadSimData(menu.filepath + menu.filename);
