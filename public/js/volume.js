@@ -229,37 +229,7 @@ transTex = updateTransferFunction();
 manager.onLoad = function() { start(); };
 
 var start = function() {
-    // Setup dat.gui
-    var gui = new dat.GUI();
-    ctlPath = gui.add(menu, 'filepath');
-    ctlFile = gui.add(menu, 'filename');
-    gui.add(menu, 'alpha_correction', 0, 4.0).listen();
-    gui.add(menu, 'star_radius', 0, 0.1).listen();
-    ctlStarColor = gui.addColor(menu, 'star_color');
-    ctlColor1 = gui.addColor(menu, 'color1');
-    ctlStep1 = gui.add(menu, 'stepPos1', 0, 1);
-    ctlColor2 = gui.addColor(menu, 'color2');
-    ctlStep2 = gui.add(menu, 'stepPos2', 0, 1);
-    ctlColor3 = gui.addColor(menu, 'color3');
-    ctlStep3 = gui.add(menu, 'stepPos3', 0, 1);
-    ctlSpecies = gui.add(menu, 'species', {"dens": 0, "densi": 1,
-					   "dens+densi": 2, "dens-densi": 3}).listen();
-    gui.add(menu, 'screenshot');
-    gui.add(menu, 'reset_view');
-    gui.add(menu, 'auto_rotate').listen();
-    gui.add(menu, 'wireframe').listen();
-
-    ctlPath.onFinishChange(updateFile);
-    ctlFile.onFinishChange(updateFile);
-    ctlStarColor.onChange(updateTexture);
-    ctlColor1.onChange(updateTexture);
-    ctlColor2.onChange(updateTexture);
-    ctlColor3.onChange(updateTexture);
-    ctlStep1.onChange(updateTexture);
-    ctlStep2.onChange(updateTexture);
-    ctlStep3.onChange(updateTexture);
-    ctlSpecies.onChange(updateSpecies);
-
+    gui = makeGUI();
     var rtTexture = new THREE.WebGLRenderTarget(
 	window.innerWidth, window.innerHeight, {
 	    minFilter: THREE.LinearFilter,
@@ -317,6 +287,40 @@ var start = function() {
     var wireframe = new THREE.LineSegments( cube_edge, wiremat );
 
     scene.add( wireframe );
+
+    function makeGUI() {
+	// Setup dat.gui
+	var gui = new dat.GUI();
+	ctlPath = gui.add(menu, 'filepath');
+	ctlFile = gui.add(menu, 'filename');
+	gui.add(menu, 'alpha_correction', 0, 4.0).listen();
+	gui.add(menu, 'star_radius', 0, 0.1).listen();
+	ctlStarColor = gui.addColor(menu, 'star_color');
+	ctlColor1 = gui.addColor(menu, 'color1');
+	ctlStep1 = gui.add(menu, 'stepPos1', 0, 1);
+	ctlColor2 = gui.addColor(menu, 'color2');
+	ctlStep2 = gui.add(menu, 'stepPos2', 0, 1);
+	ctlColor3 = gui.addColor(menu, 'color3');
+	ctlStep3 = gui.add(menu, 'stepPos3', 0, 1);
+	ctlSpecies = gui.add(menu, 'species', {"dens": 0, "densi": 1,
+					       "dens+densi": 2, "dens-densi": 3}).listen();
+	gui.add(menu, 'screenshot');
+	gui.add(menu, 'reset_view');
+	gui.add(menu, 'auto_rotate').listen();
+	gui.add(menu, 'wireframe').listen();
+
+	ctlPath.onFinishChange(updateFile);
+	ctlFile.onFinishChange(updateFile);
+	ctlStarColor.onChange(updateTexture);
+	ctlColor1.onChange(updateTexture);
+	ctlColor2.onChange(updateTexture);
+	ctlColor3.onChange(updateTexture);
+	ctlStep1.onChange(updateTexture);
+	ctlStep2.onChange(updateTexture);
+	ctlStep3.onChange(updateTexture);
+	ctlSpecies.onChange(updateSpecies);
+	return gui;
+    }
 
     function updateTexture(value) {
 	mat2.uniforms.starColor.value = new THREE.Color(menu.star_color);
@@ -386,7 +390,7 @@ var start = function() {
 	controls.update();
     }
 
-    document.body.onkeydown = function(event) {
+    canvas.onkeydown = function(event) {
 	// var key = event.which || event.keyCode || 0;
 	var key = event.code || 0;
 	// console.log(key);

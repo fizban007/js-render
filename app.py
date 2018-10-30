@@ -44,5 +44,18 @@ def render_hdf5():
     path = request.args.get('path')
     return render_template('volume.html', fpath=path, fname=filename, port=my_port)
 
+# prevent cached responses
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    return r
+
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=my_port, debug=True)
+    # app.run(host="127.0.0.1", port=my_port, debug=True)
+    app.run(host="127.0.0.1", port=my_port, debug=False)
