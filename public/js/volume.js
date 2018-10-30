@@ -133,63 +133,64 @@ camera.updateProjectionMatrix();
 console.log("http://localhost:"+my_port+"/api/img/?filename=" + fpath + fname)
 
 function initSlowLoadingManager() {
-  
-  const manager = new THREE.LoadingManager();
-  const progressBar = document.querySelector( '#progress' );
-  const loadingOverlay = document.querySelector( '#loading-overlay' );
+    
+    const manager = new THREE.LoadingManager();
+    const progressBar = document.querySelector( '#progress' );
+    const loadingOverlay = document.querySelector( '#loading-overlay' );
 
-  let percentComplete = 1;
-  let frameID = null;
+    let percentComplete = 1;
+    let frameID = null;
 
-  const updateAmount = 0.5; // in percent of bar width, should divide 100 evenly
+    const updateAmount = 0.5; // in percent of bar width, should divide 100 evenly
 
-  const animateBar = () => {
-    percentComplete += updateAmount;
+    const animateBar = () => {
+	percentComplete += updateAmount;
 
-    // if the bar fills up, just reset it.
-    // I'm changing the color only once, you 
-    // could get fancy here and set up the colour to get "redder" every time
-    if ( percentComplete >= 100 ) {
-      
-      progressBar.style.backgroundColor = 'blue'
-      percentComplete = 1;
+	// if the bar fills up, just reset it.
+	// I'm changing the color only once, you 
+	// could get fancy here and set up the colour to get "redder" every time
+	if ( percentComplete >= 100 ) {
+	    
+	    progressBar.style.backgroundColor = 'blue'
+	    percentComplete = 1;
+
+	}
+
+	progressBar.style.width = percentComplete + '%';
+
+	frameID = requestAnimationFrame( animateBar )
 
     }
 
-    progressBar.style.width = percentComplete + '%';
+    manager.onStart = () => {
 
-    frameID = requestAnimationFrame( animateBar )
+	// prevent the timer being set again
+	// if onStart is called multiple times
+	if ( frameID !== null ) return;
+	loadingOverlay.classList.remove( 'loading-overlay-hidden' );
 
-  }
+	animateBar();
 
-  manager.onStart = () => {
+    };
 
-    // prevent the timer being set again
-    // if onStart is called multiple times
-    if ( frameID !== null ) return;
+    manager.onLoad = function ( ) {
 
-    animateBar();
+	loadingOverlay.classList.add( 'loading-overlay-hidden' );
 
-  };
-
-  manager.onLoad = function ( ) {
-
-    loadingOverlay.classList.add( 'loading-overlay-hidden' );
-
-    // reset the bar in case we need to use it again
-    percentComplete = 0;
-    progressBar.style.width = 0;
-    cancelAnimationFrame( frameID );
-
-  };
-  
-  manager.onError = function ( e ) { 
+	// reset the bar in case we need to use it again
+	percentComplete = 0;
+	progressBar.style.width = 0;
+	cancelAnimationFrame( frameID );
+	frameID = null;
+    };
     
-    console.error( e ); 
-    progressBar.style.backgroundColor = 'red';
-  }
-  
-  return manager;
+    manager.onError = function ( e ) { 
+	
+	console.error( e ); 
+	progressBar.style.backgroundColor = 'red';
+    }
+    
+    return manager;
 }
 
 var manager = new THREE.LoadingManager();
