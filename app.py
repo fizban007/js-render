@@ -53,7 +53,8 @@ class ImgHandler(web.RequestHandler):
 def make_app():
     return web.Application([
         (r"/", MainHandler),
-        (r"/public/(.*)",web.StaticFileHandler, {"path": "./public"}),
+        (r"/public/(.*)", web.StaticFileHandler, {"path": "./public"}),
+        (r'/(favicon.ico)', web.StaticFileHandler, {"path": ""}),
         (r"/img/", ImgHandler),
     ], **settings)
 
