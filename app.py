@@ -41,14 +41,6 @@ class ImgHandler(web.RequestHandler):
             self.write("None")
         else:
             self.write(json.dumps(genImgJson(fname)))
-            # img = makePNG(fname)
-            # img_io = StringIO()
-            # img.save(img_io, format='png', compress_level=1)
-            # for line in img_io.getvalue():
-            #     self.write(line)
-            # # png_bytes.seek(0)
-            # # self.write(png_bytes)
-            # self.set_header("Content-type",  "image/png")
 
 def make_app():
     return web.Application([

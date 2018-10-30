@@ -346,16 +346,6 @@ var start = function() {
 	gui.add(menu, 'save');
 	// gui.add(menu, 'fov', 1.0, 200.0).listen();
 
-	// ctlPath.onFinishChange(updateFile);
-	// ctlFile.onFinishChange(updateFile);
-	// ctlStarColor.onChange(updateTexture);
-	// ctlColor1.onChange(updateTexture);
-	// ctlColor2.onChange(updateTexture);
-	// ctlColor3.onChange(updateTexture);
-	// ctlStep1.onChange(updateTexture);
-	// ctlStep2.onChange(updateTexture);
-	// ctlStep3.onChange(updateTexture);
-	// ctlSpecies.onChange(updateSpecies);
 	return gui;
     }
 
@@ -387,12 +377,10 @@ var start = function() {
 	requestAnimationFrame(animate);
 	stats.begin();
 	// required if controls.enableDamping or controls.autoRotate are set to true
-	// controls.target = new THREE.Vector3(0, 0, 0);
 	if (!menu.isPaused) {
 	    controls.update();
 	    // camera.fov = menu.fov;
 	    camera.updateProjectionMatrix();
-	    // console.log(camera.position);
 	    render();
 	}
 	stats.end();
@@ -404,7 +392,7 @@ var start = function() {
 	    texNeedsUpdate = false;
 	}
 	wireframe.visible = menu.wireframe;
-	// console.log(menu.star_radius);
+	
 	mat2.uniforms.star_radius.value = menu.star_radius;
 	mat2.uniforms.alphaCorrection.value = menu.alpha_correction;
 	renderer.render(scenefbo, camera, rtTexture, true);
@@ -462,8 +450,7 @@ var start = function() {
     // Function for loading a config file
     function loadConfigFile() {
 	var f = document.createElement('input');
-	document.body.appendChild(
-	    f); // Firefox requires the link to be in the body
+	document.body.appendChild(f); // Firefox requires the link to be in the body
 	f.setAttribute("type", "file");
 	f.setAttribute("id", "file-input");
 	f.addEventListener('change', parseConfigFile, false);
@@ -514,8 +501,6 @@ var start = function() {
 	    } catch (e) {
 		return false;
 	    }
-	    // displayContents(contents);
-	    // console.log(contents);
 	};
 	reader.readAsText(file);
     }
@@ -526,7 +511,6 @@ var start = function() {
 	conf.cam_zoom = camera.zoom;
 	var conf_str = JSON.stringify(conf);
 	console.log(conf_str);
-	// saveFile(conf_str, "config.json");
 	saveFile("data:application/octet-stream," + encodeURIComponent(conf_str), "config.json");
     }
 
