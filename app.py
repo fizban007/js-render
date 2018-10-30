@@ -36,13 +36,13 @@ def gen_image():
         png_bytes = makePNG(arg)
         png_bytes.seek(0)
         cache.update(arg, png_bytes)
-    return send_file(png_bytes, mimetype='image/png',
-                     attachment_filename='data.png')
+    return send_file(png_bytes, mimetype='image/png')
 
 @app.route('/render/', methods=['GET'])
 def render_hdf5():
     filename = request.args.get('filename')
-    return render_template('volume.html', fname=filename, port=my_port)
+    path = request.args.get('path')
+    return render_template('volume.html', fpath=path, fname=filename, port=my_port)
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=my_port)
+    app.run(host="127.0.0.1", port=my_port, debug=True)

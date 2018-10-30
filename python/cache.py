@@ -40,7 +40,7 @@ class FileCache:
         Get the cache entry for the key
         """
         if key in self.cache:
-            return self.cache[key].value
+            return self.cache[key]['value']
         else:
             return None
 
