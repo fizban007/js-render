@@ -36,6 +36,7 @@ var Menu = function() {
     this.color3 = "#ff0000";
     this.stepPos3 = 1.0;
     this.species = 0;
+    this.filepath = fpath;
     this.filename = fname;
     this.screenshot = function() {
         // renderer.render( scene, camera );
@@ -135,7 +136,7 @@ function resetView() {
 // resetView();
 camera.updateProjectionMatrix();
 
-console.log("http://localhost:"+my_port+"/api/img/?filename=" + fname)
+console.log("http://localhost:"+my_port+"/api/img/?filename=" + fpath + fname)
 
 var manager = new THREE.LoadingManager();
 var loader = new THREE.FileLoader(manager);
@@ -161,7 +162,7 @@ function loadSimData(filename) {
 		   });
 }
 
-loadSimData(menu.filename);
+loadSimData(menu.filepath + menu.filename);
 
 transTex = updateTransferFunction();
 manager.onLoad = function() { start(); };
@@ -169,6 +170,7 @@ manager.onLoad = function() { start(); };
 var start = function() {
     // Setup dat.gui
     var gui = new dat.GUI();
+    ctlPath = gui.add(menu, 'filepath');
     ctlFile = gui.add(menu, 'filename');
     gui.add(menu, 'alpha_correction', 0, 4.0).listen();
     gui.add(menu, 'star_radius', 0, 0.1).listen();
@@ -186,6 +188,7 @@ var start = function() {
     gui.add(menu, 'auto_rotate').listen();
     gui.add(menu, 'wireframe').listen();
 
+    ctlPath.onFinishChange(updateFile);
     ctlFile.onFinishChange(updateFile);
     ctlStarColor.onChange(updateTexture);
     ctlColor1.onChange(updateTexture);
@@ -264,7 +267,7 @@ var start = function() {
     }
 
     function updateFile(value) {
-	loadSimData(menu.filename);
+	loadSimData(menu.filepath + menu.filename);
     }
 
     function onWindowResize() {
