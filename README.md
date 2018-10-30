@@ -41,3 +41,5 @@ Keyboard controls:
 - `Shift + Up/Down`: Adjust camera FOV
 - `Q`: Decrease alpha correction
 - `E`: Increase alpha correction
+- `Ctrl + S`: Save current view and config to a local file
+- `Ctrl + L`: Load view and config from a local file
