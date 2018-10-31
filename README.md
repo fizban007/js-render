@@ -31,12 +31,12 @@ then navigate to the above url as if it is on your own machine.
 
 The data will be resampled to a resolution that is a power of 2. If the original data is already close to a power of 2, then the code will either cut out excess from the boundary, or pad it. If the original data falls somewhere between powers of two, then the code will use the closest one that is just smaller than the data resolution. All data is assumed to have aspect ratio of 1:1:1. If not, the data should still load, but will show up stretched when rendered in the unit box.
 
-To force a resolution (either 512 or 256), append to the url a `res` argument like this:
+To force a resolution, append to the url a `res` argument like this:
 
 	http://localhost:5050/?path=PATH&filename=FILE&res=256
 
-This will force the rendering to be at 256x256x256 by interpolating the data to this grid size.
-	
+This will force the rendering to be at 256x256x256 by interpolating the data to this grid size. 512 is the highest recommended. 1024 will require a LOT of memory and likely crash the server. 64 or lower will give a very blocky and blurry effect.
+
 # How to use
 
 Initially when you load the webpage you will see a sphere and some controls on the upper right corner. The texture will load in 20~30 seconds, so don't panic. The controls are pretty self-explanatory. You can change the file it's rendering in the `filename` box.
