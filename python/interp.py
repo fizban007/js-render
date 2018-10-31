@@ -25,14 +25,14 @@ def resample(data, shape):
 def just_above_power(n):
     for i in range(4, 11):
         target = 1 << i
-        if target < n and target > n*0.8:
+        if target <= n and target > n*0.8:
             return True, target
     return False, 0
 
 def just_below_power(n):
     for i in range(4, 11):
         target = 1 << i
-        if target > n and target < n*1.2:
+        if target >= n and target < n*1.2:
             return True, target
     return False, 0
 
