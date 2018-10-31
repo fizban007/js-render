@@ -66,7 +66,7 @@ def hdf2png(fname, res=0, max_val=100.0):
         data = interp.resample(dens, (res, res, res))
         datai = interp.resample(densi, (res, res, res))
         databi = interp.resample(bdensi, (res, res, res))
-    print('Finished resampling')
+    print('Finished resampling, data shape is', data.shape)
     if data.shape[0]>=512: tile_x = 32
     tile_y = data.shape[0] // tile_x
     img_width = tile_x * data.shape[2]
