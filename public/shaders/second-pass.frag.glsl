@@ -9,8 +9,10 @@ uniform sampler2D transferTex;
 uniform vec3 starColor;
 uniform float steps;
 uniform float alphaCorrection;
-uniform float res;
-uniform float row;
+uniform float res_x;
+uniform float res_y;
+uniform float tile_x;
+uniform float tile_y;
 uniform float star_radius;
 uniform int species;
 
@@ -32,27 +34,26 @@ vec4 sampleAs3DTexture(vec3 texCoord) {
 
   // The z coordinate determines which Z slice we have to look for.
   // Z slice number goes from 0 to 255.
-  float zSliceNumber1 = floor(texCoord.z * (res - 1.0));
+  float zSliceNumber1 = floor(texCoord.z * (tile_x * tile_y - 1.0));
 
   // As we use trilinear we go the next Z slice.
-  float zSliceNumber2 = min(zSliceNumber1 + 1.0, (res - 1.0)); // Clamp to 255
+  float zSliceNumber2 = min(zSliceNumber1 + 1.0, (tile_x * tile_y - 1.0)); // Clamp to 255
 
-  float col = res/row;
-  // The Z slices are stored in a matrix of 16x16 of Z slices.
+  // The Z slices are stored in a matrix of tile_x x tile_y of Z slices.
   // The original UV coordinates have to be rescaled by the tile numbers in each
   // row and column.
-  texCoord.x /= row;
-  texCoord.y /= col;
+  texCoord.x /= tile_x;
+  texCoord.y /= tile_y;
 
   texCoordSlice1 = texCoordSlice2 = texCoord.xy;
 
   // Add an offset to the original UV coordinates depending on the row and
   // column number.
-  texCoordSlice1.x += (mod(zSliceNumber1, row) / row);
-  texCoordSlice1.y += floor(zSliceNumber1 / row) / col;
+  texCoordSlice1.x += (mod(zSliceNumber1, tile_x) / tile_x);
+  texCoordSlice1.y += floor(zSliceNumber1 / tile_x) / tile_y;
 
-  texCoordSlice2.x += (mod(zSliceNumber2, row) / row);
-  texCoordSlice2.y += floor(zSliceNumber2 / row) / col;
+  texCoordSlice2.x += (mod(zSliceNumber2, tile_x) / tile_x);
+  texCoordSlice2.y += floor(zSliceNumber2 / tile_x) / tile_y;
 
   // Get the opacity value from the 2D texture.
   // Bilinear filtering is done at each texture2D by default.
@@ -91,7 +92,7 @@ vec4 sampleAs3DTexture(vec3 texCoord) {
 
   // How distant is zSlice1 to ZSlice2. Used to interpolate between one Z slice
   // and the other.
-  float zDifference = mod(texCoord.z * (res - 1.0), 1.0);
+  float zDifference = mod(texCoord.z * (tile_x * tile_y - 1.0), 1.0);
 
   // Finally interpolate between the two intermediate colors of each Z slice.
   return mix(color1, color2, zDifference);

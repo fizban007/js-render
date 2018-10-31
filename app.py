@@ -7,7 +7,7 @@ from io import StringIO
 
 sys.path.append('./python/')
 
-from gen_png import makePNG
+from gen_png import hdf2png
 from cache import FileCache
 
 my_port = 5050
@@ -22,9 +22,15 @@ settings = {
     # "xsrf_cookies": True,
 }
 
-def genImgJson(fname):
+def genImgJson(fname, res):
+    res = int(res)
+    img_io, tile_x, tile_y, nx, ny = hdf2png(fname, res, 100.0)
     responseDict = {
-        'imgString':'data:image/png;base64,'+base64.b64encode(makePNG(fname).getvalue()).decode('utf-8')
+        'imgString':'data:image/png;base64,'+base64.b64encode(img_io.getvalue()).decode('utf-8'),
+        'nx': nx,
+        'ny': ny,
+        'tile_x':tile_x,
+        'tile_y':tile_y
     }
     return responseDict
 
@@ -32,15 +38,21 @@ class MainHandler(web.RequestHandler):
     def get(self):
         fpath = self.get_argument('path', None)
         fname = self.get_argument('filename', None)
-        self.render("public/volume.html", fpath=fpath, fname=fname, port=my_port)
+        res = self.get_argument('res', 0)
+        self.render("public/volume.html",
+                    fpath=fpath,
+                    fname=fname,
+                    port=my_port,
+                    render_res=res)
 
 class ImgHandler(web.RequestHandler):
     def get(self):
         fname = self.get_argument('filename', None)
+        res = self.get_argument('res', 0)
         if fname == None:
             self.write("None")
         else:
-            self.write(json.dumps(genImgJson(fname)))
+            self.write(json.dumps(genImgJson(fname, res)))
 
 def make_app():
     return web.Application([

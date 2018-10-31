@@ -151,104 +151,13 @@ camera.updateProjectionMatrix();
 var manager = new THREE.LoadingManager();
 var loader = new THREE.FileLoader(manager);
 var vs1, fs1, vs2, fs2, vs3, fs3, dataTex, transTex;
+var tile_x, tile_y;
 var texNeedsUpdate = false;
 loader.setResponseType('text');
 loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.vert.glsl", function(f) {vs1 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/first-pass.frag.glsl", function(f) {fs1 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.vert.glsl", function(f) {vs2 = f;});
 loader.load("http://localhost:"+my_port+"/public/shaders/second-pass.frag.glsl", function(f) {fs2 = f;});
-
-// Functions to load the simulation data (in png texture)
-function initSlowLoadingManager() {
-    
-    const manager = new THREE.LoadingManager();
-    const progressBar = document.querySelector( '#progress' );
-    const loadingOverlay = document.querySelector( '#loading-overlay' );
-
-    let percentComplete = 1;
-    let frameID = null;
-
-    const updateAmount = 0.5; // in percent of bar width, should divide 100 evenly
-
-    const animateBar = () => {
-	percentComplete += updateAmount;
-
-	// if the bar fills up, just reset it.
-	// I'm changing the color only once, you 
-	// could get fancy here and set up the colour to get "redder" every time
-	if ( percentComplete >= 100 ) {
-	    // progressBar.style.backgroundColor = 'blue'
-	    percentComplete = 1;
-
-	}
-
-	progressBar.style.width = percentComplete + '%';
-
-	frameID = requestAnimationFrame( animateBar )
-
-    }
-
-    manager.onStart = () => {
-
-	// prevent the timer being set again
-	// if onStart is called multiple times
-	if ( frameID !== null ) return;
-	loadingOverlay.classList.remove( 'loading-overlay-hidden' );
-
-	animateBar();
-
-    };
-
-    manager.onLoad = function ( ) {
-
-	loadingOverlay.classList.add( 'loading-overlay-hidden' );
-
-	// reset the bar in case we need to use it again
-	percentComplete = 0;
-	progressBar.style.width = 0;
-	cancelAnimationFrame( frameID );
-	frameID = null;
-    };
-    
-    manager.onError = function ( e ) { 
-	
-	console.error( e ); 
-	progressBar.style.backgroundColor = 'red';
-    }
-    
-    return manager;
-}
-
-function loadSimData(filename) {
-    var slow_manager = initSlowLoadingManager();
-    // var imgloader = new THREE.TextureLoader(slow_manager);
-    var json_loader = new THREE.FileLoader(slow_manager);
-    // imgloader.load("http://localhost:"+my_port+"/img/?filename=" + filename,
-    // 		   function(f) {
-    // 		       dataTex = f;
-    // 		       dataTex.flipY = false;
-    // 		       dataTex.minFilter = THREE.LinearFilter;
-    // 		       dataTex.magFilter = THREE.LinearFilter;
-    // 		       dataTex.type = THREE.UnsignedByteType;
-    // 		       console.info("Loaded Simulation Data");
-    // 		       texNeedsUpdate = true;
-    // 		   }, slow_manager.onProgress, slow_manager.onError);
-    json_loader.load("http://localhost:"+my_port+"/img/?filename=" + filename,
-    		     function(content) {
-			 var texloader = new THREE.TextureLoader(slow_manager);
-			 texloader.load(JSON.parse(content).imgString, function(f) {
-    			     dataTex = f;
-    			     dataTex.flipY = false;
-    			     dataTex.minFilter = THREE.LinearFilter;
-    			     dataTex.magFilter = THREE.LinearFilter;
-    			     dataTex.type = THREE.UnsignedByteType;
-    			     console.info("Loaded Simulation Data");
-    			     texNeedsUpdate = true;
-			 }, slow_manager.onProgress, slow_manager.onError);
-    		     }, slow_manager.onProgress, slow_manager.onError);
-}
-
-loadSimData(menu.filepath + menu.filename);
 
 transTex = updateTransferFunction();
 manager.onLoad = function() { start(); };
@@ -283,6 +192,7 @@ var start = function() {
     });
 
     // Second pass shader
+    // console.log(tile_x)
     var mat2 = new THREE.ShaderMaterial({
 	uniforms: {
 	    tex: {type: "t", value: rtTexture.texture},
@@ -291,8 +201,10 @@ var start = function() {
 	    starColor: { type: "c", value: new THREE.Color(menu.star_color)},
 	    steps: {type: "f", value: 256.0},
 	    alphaCorrection: {type: "f", value: 1.0},
-	    res: {type: "f", value: 512.0},
-	    row: {type: "f", value: 32.0},
+	    res_x: {type: "f", value: render_res},
+	    res_y: {type: "f", value: render_res},
+	    tile_x: {type: "f", value: tile_x},
+	    tile_y: {type: "f", value: tile_y},
 	    star_radius: {value: menu.star_radius},
 	    species: {type: "i", value: menu.species}
 	},
@@ -302,6 +214,90 @@ var start = function() {
 	// depthWrite: true,
 	// transparent: true
     });
+
+    // Functions to load the simulation data (in png texture)
+    function initSlowLoadingManager() {
+	const manager = new THREE.LoadingManager();
+	const progressBar = document.querySelector( '#progress' );
+	const loadingOverlay = document.querySelector( '#loading-overlay' );
+
+	let percentComplete = 1;
+	let frameID = null;
+
+	const updateAmount = 0.5; // in percent of bar width, should divide 100 evenly
+
+	const animateBar = () => {
+	    percentComplete += updateAmount;
+
+	    // if the bar fills up, just reset it.
+	    // I'm changing the color only once, you 
+	    // could get fancy here and set up the colour to get "redder" every time
+	    if ( percentComplete >= 100 ) {
+		// progressBar.style.backgroundColor = 'blue'
+		percentComplete = 1;
+	    }
+
+	    progressBar.style.width = percentComplete + '%';
+	    frameID = requestAnimationFrame( animateBar )
+	}
+
+	manager.onStart = () => {
+	    // prevent the timer being set again
+	    // if onStart is called multiple times
+	    if ( frameID !== null ) return;
+	    loadingOverlay.classList.remove( 'loading-overlay-hidden' );
+	    animateBar();
+	};
+
+	manager.onLoad = function ( ) {
+	    loadingOverlay.classList.add( 'loading-overlay-hidden' );
+
+	    // reset the bar in case we need to use it again
+	    percentComplete = 0;
+	    progressBar.style.width = 0;
+	    cancelAnimationFrame( frameID );
+	    frameID = null;
+	};
+	
+	manager.onError = function ( e ) { 
+	    console.error( e ); 
+	    progressBar.style.backgroundColor = 'red';
+	}
+	
+	return manager;
+    }
+
+    function loadSimData(filename) {
+	var slow_manager = initSlowLoadingManager();
+	var json_loader = new THREE.FileLoader(slow_manager);
+	json_loader.load("http://localhost:"+my_port+"/img/?filename=" + filename
+			 + "&res=" + render_res.toString(),
+    			 function(content) {
+			     var texloader = new THREE.TextureLoader(slow_manager);
+			     var response = JSON.parse(content);
+			     tile_x = response.tile_x;
+			     tile_y = response.tile_y;
+			     // render_res = response.res;
+			     mat2.uniforms.tile_x.value = tile_x;
+			     mat2.uniforms.tile_y.value = tile_y;
+			     mat2.uniforms.res_x.value = response.nx;
+			     mat2.uniforms.res_y.value = response.ny;
+			     texloader.load(response.imgString, function(f) {
+    				 dataTex = f;
+    				 dataTex.flipY = false;
+    				 dataTex.minFilter = THREE.LinearFilter;
+    				 dataTex.magFilter = THREE.LinearFilter;
+    				 dataTex.type = THREE.UnsignedByteType;
+    				 console.info("Loaded Simulation Data");
+    				 texNeedsUpdate = true;
+				 // updateTexture();
+			     }, slow_manager.onProgress, slow_manager.onError);
+    			 }, slow_manager.onProgress, slow_manager.onError);
+    }
+
+    loadSimData(menu.filepath + menu.filename);
+
+
 
     // Add a cube
     var cube_geometry = new THREE.BoxGeometry(1, 1, 1);
