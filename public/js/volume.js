@@ -20,7 +20,7 @@ var saveFile =
     }
 
 // Constructing the menu
-var Menu = function() {
+var Config = function() {
     this.alpha_correction = 1.0;
     this.star_radius = 0.055;
     this.star_color = "#666666";
@@ -44,7 +44,7 @@ var Menu = function() {
     this.isPaused = false;
     this.fov = 20;
 };
-var menu = new Menu();
+var menu = new Config();
 
 // Add a fps panel
 var stats = new Stats();
@@ -475,8 +475,6 @@ var start = function() {
 		menu.color3 = config.color3;
 		menu.stepPos3 = config.stepPos3;
 		menu.species = config.species;
-		menu.filepath = config.filepath;
-		menu.filename = config.filename;
 		menu.wireframe = config.wireframe;
 		menu.auto_rotate = config.auto_rotate;
 		menu.fov = config.fov;
@@ -491,7 +489,6 @@ var start = function() {
 		    gui.__controllers[i].updateDisplay();
 		}
 		camera.updateProjectionMatrix();
-		updateFile();
 		updateTexture();
 		updateSpecies();
 	    } catch (e) {
