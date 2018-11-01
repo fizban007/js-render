@@ -1,6 +1,28 @@
 // Enable caching, file loader seem to only work this way
 THREE.Cache.enabled = true;
 
+var opts = {
+  lines: 11, // The number of lines to draw
+  length: 25, // The length of each line
+  width: 18, // The line thickness
+  radius: 60, // The radius of the inner circle
+  scale: 0.9, // Scales overall size of the spinner
+  corners: 0.9, // Corner roundness (0..1)
+  color: '#ffffff', // CSS color or array of colors
+  fadeColor: 'transparent', // CSS color or array of colors
+  speed: 0.6, // Rounds per second
+  rotate: 0, // The rotation offset
+  animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+  direction: 1, // 1: clockwise, -1: counterclockwise
+  zIndex: 2e9, // The z-index (defaults to 2000000000)
+  className: 'spinner', // The CSS class to assign to the spinner
+  top: '50%', // Top position relative to parent
+  left: '50%', // Left position relative to parent
+  shadow: '0 0 1px transparent', // Box-shadow for the lines
+  position: 'absolute' // Element positioning
+};
+
+
 var strDownloadMime = "image/octet-stream";
 
 // Function for saving a file (screenshot)
@@ -218,50 +240,19 @@ var start = function() {
     // Functions to load the simulation data (in png texture)
     function initSlowLoadingManager() {
 	const manager = new THREE.LoadingManager();
-	const progressBar = document.querySelector( '#progress' );
-	const loadingOverlay = document.querySelector( '#loading-overlay' );
-
-	let percentComplete = 1;
-	let frameID = null;
-
-	const updateAmount = 0.5; // in percent of bar width, should divide 100 evenly
-
-	const animateBar = () => {
-	    percentComplete += updateAmount;
-
-	    // if the bar fills up, just reset it.
-	    // I'm changing the color only once, you 
-	    // could get fancy here and set up the colour to get "redder" every time
-	    if ( percentComplete >= 100 ) {
-		// progressBar.style.backgroundColor = 'blue'
-		percentComplete = 1;
-	    }
-
-	    progressBar.style.width = percentComplete + '%';
-	    frameID = requestAnimationFrame( animateBar )
-	}
+	var spinner;
 
 	manager.onStart = () => {
-	    // prevent the timer being set again
-	    // if onStart is called multiple times
-	    if ( frameID !== null ) return;
-	    loadingOverlay.classList.remove( 'loading-overlay-hidden' );
-	    animateBar();
+	    var target = document.body;
+	    spinner = new Spinner(opts).spin(target);
 	};
 
 	manager.onLoad = function ( ) {
-	    loadingOverlay.classList.add( 'loading-overlay-hidden' );
-
-	    // reset the bar in case we need to use it again
-	    percentComplete = 0;
-	    progressBar.style.width = 0;
-	    cancelAnimationFrame( frameID );
-	    frameID = null;
+	    spinner.stop();
 	};
 	
 	manager.onError = function ( e ) { 
 	    console.error( e ); 
-	    progressBar.style.backgroundColor = 'red';
 	}
 	
 	return manager;
