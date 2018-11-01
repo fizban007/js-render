@@ -51,3 +51,11 @@ Keyboard controls:
 - `E`: Increase alpha correction
 - `Ctrl + S`: Save current view and config to a local file
 - `Ctrl + L`: Load view and config from a local file
+
+# Roadmap
+
+- [ ] Add field lines
+- [ ] Save/load the png texture for a given file
+- [ ] Add an interface for the user to choose how the png is generated, including components and scale
+- [ ] Add the functionality of generating a series of png files, thus making it possible to move between frames
+- [ ] Making movies (with camera control?)
