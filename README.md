@@ -54,6 +54,8 @@ Keyboard controls:
 
 # Roadmap
 
+- [X] Adaptive resolution (possible to open any file)
+- [ ] Aspect ratio of the box (detect the aspect ratio of the generated file)
 - [ ] Add field lines
 - [ ] Save/load the png texture for a given file
 - [ ] Add an interface for the user to choose how the png is generated, including components and scale
