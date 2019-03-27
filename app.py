@@ -55,6 +55,18 @@ class StaticHandler(web.RequestHandler):
                     fname=fname,
                     port=my_port,
                     render_res=res)
+
+class VRHandler(web.RequestHandler):
+    def get(self):
+        fpath = self.get_argument('path', None)
+        fname = self.get_argument('filename', None)
+        res = self.get_argument('res', 0)
+        self.render("public/volume-vr.html",
+                    fpath=fpath,
+                    fname=fname,
+                    port=my_port,
+                    render_res=res)
+
 class ImgHandler(web.RequestHandler):
     def get(self):
         fname = self.get_argument('filename', None)
@@ -73,6 +85,7 @@ def make_app():
     return web.Application([
         (r"/", MainHandler),
         (r"/static", StaticHandler),
+        (r"/vr", VRHandler),
         (r"/public/(.*)", web.StaticFileHandler, {"path": "./public"}),
         (r"/img/", ImgHandler),
     ], **settings)
