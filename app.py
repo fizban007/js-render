@@ -45,6 +45,16 @@ class MainHandler(web.RequestHandler):
                     port=my_port,
                     render_res=res)
 
+class StaticHandler(web.RequestHandler):
+    def get(self):
+        fpath = self.get_argument('path', None)
+        fname = self.get_argument('filename', None)
+        res = self.get_argument('res', 0)
+        self.render("public/volume-static.html",
+                    fpath=fpath,
+                    fname=fname,
+                    port=my_port,
+                    render_res=res)
 class ImgHandler(web.RequestHandler):
     def get(self):
         fname = self.get_argument('filename', None)
@@ -52,11 +62,17 @@ class ImgHandler(web.RequestHandler):
         if fname == None:
             self.write("None")
         else:
-            self.write(json.dumps(genImgJson(fname, res)))
+            data = json.dumps(genImgJson(fname, res))
+            self.write(data)
+            # loaded_data = json.loads(data)
+            # with open('data.json', 'w') as outfile:
+            #     json.dump(loaded_data, outfile, ensure_ascii=False)
+        # self.set_header('Content-Type', 'application/json')
 
 def make_app():
     return web.Application([
         (r"/", MainHandler),
+        (r"/static", StaticHandler),
         (r"/public/(.*)", web.StaticFileHandler, {"path": "./public"}),
         (r"/img/", ImgHandler),
     ], **settings)

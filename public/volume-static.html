@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Visualization</title>
+    <script>
+     var fname = "{{fname}}"
+     var fpath = "{{fpath}}"
+     var my_port = "{{port}}"
+     var render_res = "{{render_res}}"
+    </script>
+    <link rel="stylesheet" type="text/css" href="/public/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/public/css/spin.css">
+    <script src="/public/vendor/three.min.js"></script>
+    <script src="/public/vendor/OrbitControls.js"></script>
+    <!-- <script src="vendor/socket.io-client/dist/socket.io.js"></script> -->
+    <script src="/public/vendor/THREE.MeshLine.js"></script>
+    <script src="/public/vendor/dat.gui.min.js"></script>
+    <script src="/public/vendor/stats.min.js"></script>
+    <script src="/public/vendor/spin.js"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ static_url('favicon.ico') }}"/>
+  </head>
+  <body>
+    <!-- <script src="/public/js/volume.js"></script> -->
+    <script src="{{ static_url('js/volume-static.js') }}"></script>
+  </body>
+</html>
